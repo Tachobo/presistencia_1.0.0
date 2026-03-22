@@ -1,7 +1,7 @@
 import { ProductModel } from "../models/product.model.js";
 
-const getAllProducts = (req, res) => {
-  const products = ProductModel.findAll();
+const getAllProducts = async (req, res) => {
+  const products = await ProductModel.findAll();
   res.status(200).json({
     success: true,
     message: "Lista de productos",
@@ -10,10 +10,10 @@ const getAllProducts = (req, res) => {
   });
 };
 
-const getProductById = (req, res) => {
+const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = ProductModel.findById(Number(id));
+    const product = await ProductModel.findById(Number(id));
     // Validamos si el producto existe
     if (!product) {
       return res.status(404).json({
@@ -39,10 +39,10 @@ const getProductById = (req, res) => {
   }
 };
 
-const createProduct = (req, res) => {
-  const { name, price } = req.body;
+const createProduct = async (req, res) => {
+  const { name, price, categoryId } = req.body;
   // Validación simple
-  if (!name || !price) {
+  if (!name || !price || !categoryId) {
     return res.status(400).json({
       success: false,
       message: "Nombre y precio son obligatorios",
@@ -51,7 +51,7 @@ const createProduct = (req, res) => {
     });
   }
 
-  const newProduct = ProductModel.create({ name, price });
+  const newProduct = await ProductModel.create({ name, price, categoryId });
   res.status(201).json({
     success: true,
     message: "Producto creado correctamente",
@@ -60,9 +60,9 @@ const createProduct = (req, res) => {
   });
 };
 
-const updateProduct = (req, res) => {
+const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const updatedProduct = ProductModel.update(Number(id), req.body);
+  const updatedProduct = await ProductModel.update(Number(id), req.body);
   if (!updatedProduct) { 
     return res.status(404).json({
       success: false,
@@ -79,10 +79,10 @@ const updateProduct = (req, res) => {
   });
 };
 
-const deleteProduct = (req, res) => {
+const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const isDeleted = ProductModel.delete(Number(id));
+    const isDeleted = await ProductModel.delete(Number(id));
     if (!isDeleted) {
       return res.status(404).json({
         success: false,

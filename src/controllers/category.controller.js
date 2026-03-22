@@ -2,8 +2,8 @@ import { CategoryModel } from "../models/category.model.js";
 // IMPORTANTE: Importamos el modelo de productos para las reglas de negocio cruzadas
 import { ProductModel } from "../models/product.model.js";
 
-const getAllCategories = (req, res) => {
-  const categories = CategoryModel.findAll();
+const getAllCategories = async (req, res) => {
+  const categories = await CategoryModel.findAll();
   res.status(200).json({
     success: true,
     message: "Lista de categorías",
@@ -12,10 +12,10 @@ const getAllCategories = (req, res) => {
   });
 };
 
-const getCategoryById = (req, res) => {
+const getCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
-    const category = CategoryModel.findById(Number(id));
+    const category = await CategoryModel.findById(Number(id));
 
     if (!category) {
       return res.status(404).json({
@@ -41,7 +41,7 @@ const getCategoryById = (req, res) => {
   }
 };
 
-const createCategory = (req, res) => {
+const createCategory = async (req, res) => {
   const { name } = req.body;
 
   // Validación simple
@@ -54,7 +54,7 @@ const createCategory = (req, res) => {
     });
   }
 
-  const newCategory = CategoryModel.create({ name });
+  const newCategory = await CategoryModel.create({ name });
   res.status(201).json({
     success: true,
     message: "Categoría creada correctamente",
@@ -63,9 +63,9 @@ const createCategory = (req, res) => {
   });
 };
 
-const updateCategory = (req, res) => {
+const updateCategory = async (req, res) => {
   const { id } = req.params;
-  const updatedCategory = CategoryModel.update(Number(id), req.body);
+  const updatedCategory = await CategoryModel.update(Number(id), req.body);
 
   if (!updatedCategory) {
     return res.status(404).json({
@@ -84,12 +84,12 @@ const updateCategory = (req, res) => {
 };
 
 // RETO DE INTEGRIDAD: Eliminar validando dependencias
-const deleteCategory = (req, res) => {
+const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
 
     // 1. Verificamos si la categoría existe antes de intentar borrarla
-    const categoryExists = CategoryModel.findById(Number(id));
+    const categoryExists = await CategoryModel.findById(Number(id));
     if (!categoryExists) {
       return res.status(404).json({
         success: false,
@@ -100,7 +100,7 @@ const deleteCategory = (req, res) => {
     }
 
     // 2. Regla de Negocio: Preguntamos al Modelo de Productos si hay recursos vinculados
-    const linkedProducts = ProductModel.findByCategoryId(Number(id));
+    const linkedProducts = await ProductModel.findByCategoryId(Number(id));
     if (linkedProducts && linkedProducts.length > 0) {
       return res.status(409).json({ // 409 Conflict
         success: false,
@@ -111,7 +111,7 @@ const deleteCategory = (req, res) => {
     }
 
     // 3. Si pasa las validaciones, procedemos a eliminar
-    const isDeleted = CategoryModel.delete(Number(id));
+    await CategoryModel.delete(Number(id));
     res.status(200).json({
       success: true,
       message: "Categoría eliminada correctamente",
@@ -129,12 +129,12 @@ const deleteCategory = (req, res) => {
 };
 
 // RUTA RELACIONAL: Traer todos los productos de una categoría
-const getProductsByCategory = (req, res) => {
+const getProductsByCategory = async (req, res) => {
   try {
     const { id } = req.params;
 
     // 1. Validar que la categoría exista
-    const categoryExists = CategoryModel.findById(Number(id));
+    const categoryExists = await CategoryModel.findById(Number(id));
     if (!categoryExists) {
       return res.status(404).json({
         success: false,
@@ -145,7 +145,7 @@ const getProductsByCategory = (req, res) => {
     }
 
     // 2. Buscar los productos
-    const products = ProductModel.findByCategoryId(Number(id));
+    const products = await ProductModel.findByCategoryId(Number(id));
     res.status(200).json({
       success: true,
       message: `Productos de la categoría: ${categoryExists.name}`,
